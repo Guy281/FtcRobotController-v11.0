@@ -7,7 +7,9 @@ import android.annotation.SuppressLint;
 
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.ProfileAccelConstraint;
 import com.acmerobotics.roadrunner.SequentialAction;
+import com.acmerobotics.roadrunner.TranslationalVelConstraint;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -27,15 +29,28 @@ public class AutoTemplate extends LinearOpMode {
     //Include all of your motors and sensors
     Actuators actuator = new Actuators();
     Sensors sensor = new Sensors();
-    private static final boolean USE_WEBCAM = true;  // true for webcam, false for phone camera
+
     private AprilTagProcessor aprilTag; // store our instance of the AprilTag processor.
     private VisionPortal visionPortal; // store our instance of the vision portal.
+
+    AprilTagDetection tagOfInterest = null;
 
     int GPP = 21;
     int PGP = 22;
     int PPG = 23;
 
-    AprilTagDetection tagOfInterest = null;
+
+    double startingPos_X = -53;
+    double startingPos_Y = -49;
+    double startingPos_Heading = Math.toRadians(55);
+
+    double scanAprilTagPos_X = -26;
+    double scanAprilTagPos_Y = -24;
+    double scanAprilTagPos_Heading = Math.toRadians(145);
+
+    double pickedUpArtifactsPos_X = 6;
+    double pickedUpArtifactsPos_Y = -16;
+    double pickedUpArtifactsPos_Heading = Math.toRadians(270);
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -49,22 +64,34 @@ public class AutoTemplate extends LinearOpMode {
 
         //TODO: Set up Robot starting position here!!!
         MecanumDrive drive = new MecanumDrive(hardwareMap,
-                new Pose2d(0, 0, Math.toRadians(180) ) );
+                new Pose2d(startingPos_X, startingPos_Y, startingPos_Heading ) );
 
-        //TODO: Put your Odometry trajectory paths here!!!
-        //Separate your paths by action (linearSlide movements, intake movements, servo movements, etc.)
-        Action aprilTagGPP = drive.actionBuilder(new Pose2d(0, 0, Math.toRadians(180) ))
-                .strafeToLinearHeading(new Vector2d(36, 27), Math.toRadians(90))
+        Action scanAprilTag = drive.actionBuilder(new Pose2d(startingPos_X, startingPos_Y, startingPos_Heading ))
+                .strafeToLinearHeading(new Vector2d(scanAprilTagPos_X, scanAprilTagPos_Y), scanAprilTagPos_Heading)
                 .build();
 
-	    //TODO: Your trajectory 2 starting pose must match where the end of your trajectory 1 should be
-        Action aprilTagPGP = drive.actionBuilder(new Pose2d(0, 0, Math.toRadians(180) ))
-                .strafeToLinearHeading(new Vector2d(-12.5, 27), Math.toRadians(90))
+        Action splineTest = drive.actionBuilder(new Pose2d(startingPos_X, startingPos_Y, startingPos_Heading ))
+                .splineTo(new Vector2d(0, 0), Math.toRadians(0),
+                        new TranslationalVelConstraint(20),
+                        new ProfileAccelConstraint(-20.0, 20.0)) //Do this path faster
                 .build();
 
-	    //TODO: Your trajectory 3 starting pose must match where the end of your trajectory 2 should be
-        Action aprilTagPPG = drive.actionBuilder(new Pose2d(0, 0, Math.toRadians(180) ))
-                .strafeToLinearHeading(new Vector2d(-11, 27), Math.toRadians(90))
+        Action aprilTagGPP21 = drive.actionBuilder(new Pose2d(scanAprilTagPos_X, scanAprilTagPos_Y, scanAprilTagPos_Heading ))
+                .splineTo(new Vector2d(19, -20), Math.toRadians(0))
+                .splineTo(new Vector2d(36, -30), Math.toRadians(270))
+                .build();
+
+        Action aprilTagPGP22 = drive.actionBuilder(new Pose2d(scanAprilTagPos_X, scanAprilTagPos_Y, scanAprilTagPos_Heading ))
+                .splineTo(new Vector2d(-5, -20), Math.toRadians(0))
+                .splineTo(new Vector2d(12, -30), Math.toRadians(270))
+                .build();
+
+        Action aprilTagPPG23 = drive.actionBuilder(new Pose2d(scanAprilTagPos_X, scanAprilTagPos_Y, scanAprilTagPos_Heading ))
+                .splineToSplineHeading(new Pose2d(-12, -30, Math.toRadians(270)), Math.toRadians(270))
+                .build();
+
+        Action scoreArtifacts = drive.actionBuilder(new Pose2d(pickedUpArtifactsPos_X, pickedUpArtifactsPos_Y, pickedUpArtifactsPos_Heading))
+                .splineToSplineHeading(new Pose2d(startingPos_X, startingPos_Y, startingPos_Heading), Math.toRadians(270))
                 .build();
 
         //Create more trajectories as needed
@@ -74,7 +101,7 @@ public class AutoTemplate extends LinearOpMode {
             actuator.init(hardwareMap);
             sensor.init(hardwareMap);
             //telemetryAprilTag();
-
+/*
             List<AprilTagDetection> currentDetections = aprilTag.getDetections();
 
             if(currentDetections.size() != 0) {
@@ -88,49 +115,30 @@ public class AutoTemplate extends LinearOpMode {
                     }
                 }
             }
-/*
-                if(tagFound)
-                {
-                    telemetry.addLine("Tag of interest is in sight!\n\nLocation data:");
-                    tagToTelemetry(tagOfInterest);
-                }
-                else
-                {
-                    telemetry.addLine("Don't see tag of interest :(");
-
-                    if(tagOfInterest == null)
-                    {
-                        telemetry.addLine("(The tag has never been seen)");
-                    }
-                    else
-                    {
-                        telemetry.addLine("\nBut we HAVE seen the tag before; last seen at:");
-                        tagToTelemetry(tagOfInterest);
-                    }
-
- */
-
-            if(tagOfInterest != null) {
-                telemetry.addLine("Tag snapshot:\n");
-                telemetry.update();
-            }
-            else {
-                telemetry.addLine("No tag snapshot available, it was never sighted during the init loop :(");
-                telemetry.update();
-            }
 
             cameraEnableAndDisable();
             telemetry.update();
             // Share the CPU.
             sleep(20);
+
+ */
         }
 
         // Save more CPU resources when camera is no longer needed.
-        visionPortal.close();
+        //visionPortal.close();
 
         waitForStart();
 
         if (opModeIsActive() && !isStopRequested()) {
+            Actions.runBlocking(new SequentialAction(splineTest));
+
+            /*
+            // Move to scan AprilTag
+            Actions.runBlocking(new SequentialAction(scanAprilTag));
+
+            //Scan AprilTag and Close the VP
+            aprilTagStart();
+            visionPortal.close();
 
             if(tagOfInterest == null) {
                 telemetry.addLine("Where is the AprilTag?");
@@ -139,22 +147,30 @@ public class AutoTemplate extends LinearOpMode {
             else {
                 switch(tagOfInterest.id) {
                     case 21:
-                        telemetry.addLine("Case 1, IT WORKED!!!!");
-                        Actions.runBlocking(new SequentialAction(aprilTagGPP));
+                        pickedUpArtifactsPos_X = 36; pickedUpArtifactsPos_Y = -30; pickedUpArtifactsPos_Heading = Math.toRadians(270);
+                        telemetry.addLine("AprilTag ID 21 GPP");
+                        Actions.runBlocking(new SequentialAction(aprilTagGPP21));
+                        Actions.runBlocking(new SequentialAction(scoreArtifacts));
                         telemetry.update();
                         break;
                     case 22:
-                        telemetry.addLine("Case 2, IT WORKED!!!!");
-                        Actions.runBlocking(new SequentialAction(aprilTagPGP));
+                        pickedUpArtifactsPos_X = 12; pickedUpArtifactsPos_Y = -30; pickedUpArtifactsPos_Heading = Math.toRadians(270);
+                        telemetry.addLine("AprilTag ID 22 PGP");
+                        Actions.runBlocking(new SequentialAction(aprilTagPGP22));
+                        Actions.runBlocking(new SequentialAction(scoreArtifacts));
                         telemetry.update();
                         break;
                     case 23:
-                        telemetry.addLine("Case 3, IT WORKED!!!!");
-                        Actions.runBlocking(new SequentialAction(aprilTagPPG));
+                        pickedUpArtifactsPos_X = -12; pickedUpArtifactsPos_Y = -30; pickedUpArtifactsPos_Heading = Math.toRadians(270);
+                        telemetry.addLine("AprilTag ID 23 PPG");
+                        Actions.runBlocking(new SequentialAction(aprilTagPPG23));
+                        Actions.runBlocking(new SequentialAction(scoreArtifacts));
                         telemetry.update();
                         break;
                 }
             }
+
+             */
         }
     }
 
@@ -165,6 +181,25 @@ public class AutoTemplate extends LinearOpMode {
     public void moveServo(int time) {
         //move your servo
         sleep(time);
+    }
+
+    private void aprilTagStart() {
+        List<AprilTagDetection> currentDetections = aprilTag.getDetections();
+
+        if(currentDetections.size() != 0) {
+            boolean tagFound = false;
+
+            for (AprilTagDetection tag : currentDetections) {
+                if (tag.id == GPP || tag.id == PGP || tag.id == PPG) {
+                    tagOfInterest = tag;
+                    tagFound = true;
+                    break;
+                }
+            }
+        }
+        telemetry.update();
+        // Share the CPU.
+        sleep(20);
     }
 
     private void cameraEnableAndDisable() {
