@@ -39,10 +39,31 @@ public class AutoTemplate extends LinearOpMode {
     int PGP = 22;
     int PPG = 23;
 
-
+    ////////// STARTING POSITION //////////
     double startingPos_X = -53;
     double startingPos_Y = -49;
     double startingPos_Heading = Math.toRadians(55);
+
+    /////////// APRILTAG PPG 23 ///////////
+    double firstAprilTagPPG23Pos_X = -53;
+    double firstAprilTagPPG23Pos_Y = -49;
+    double firstAprilTagPPG23Pos_Heading = Math.toRadians(55);
+
+    /////////// APRILTAG PGP 22 ///////////
+    double firstAprilTagPGP22Pos_X = -5;
+    double firstAprilTagPGP22Pos_Y = -20;
+    double firstAprilTagPGP22Pos_Heading = Math.toRadians(0);
+    double secondAprilTagPGP22Pos_X = 12;
+    double secondAprilTagPGP22Pos_Y = -30;
+    double secondAprilTagPGP22Pos_Heading = Math.toRadians(270);
+
+    /////////// APRILTAG GPP 21 ///////////
+    double firstAprilTagGPP21Pos_X = 19;
+    double firstAprilTagGPP21Pos_Y = -20;
+    double firstAprilTagGPP21Pos_Heading = Math.toRadians(0);
+    double secondAprilTagGPP21Pos_X = 36;
+    double secondAprilTagGPP21Pos_Y = -30;
+    double secondAprilTagGPP21Pos_Heading = Math.toRadians(270);
 
     double scanAprilTagPos_X = -26;
     double scanAprilTagPos_Y = -24;
@@ -76,18 +97,18 @@ public class AutoTemplate extends LinearOpMode {
                         new ProfileAccelConstraint(-20.0, 20.0)) //Do this path faster
                 .build();
 
-        Action aprilTagGPP21 = drive.actionBuilder(new Pose2d(scanAprilTagPos_X, scanAprilTagPos_Y, scanAprilTagPos_Heading ))
-                .splineTo(new Vector2d(19, -20), Math.toRadians(0))
-                .splineTo(new Vector2d(36, -30), Math.toRadians(270))
+        Action aprilTagPPG23 = drive.actionBuilder(new Pose2d(scanAprilTagPos_X, scanAprilTagPos_Y, scanAprilTagPos_Heading ))
+                .splineToSplineHeading(new Pose2d(firstAprilTagPPG23Pos_X, firstAprilTagPPG23Pos_Y, firstAprilTagPPG23Pos_Heading), Math.toRadians(270))
                 .build();
 
         Action aprilTagPGP22 = drive.actionBuilder(new Pose2d(scanAprilTagPos_X, scanAprilTagPos_Y, scanAprilTagPos_Heading ))
-                .splineTo(new Vector2d(-5, -20), Math.toRadians(0))
-                .splineTo(new Vector2d(12, -30), Math.toRadians(270))
+                .splineTo(new Vector2d(firstAprilTagPGP22Pos_X, firstAprilTagPGP22Pos_Y), firstAprilTagPGP22Pos_Heading)
+                .splineTo(new Vector2d(secondAprilTagPGP22Pos_X, secondAprilTagPGP22Pos_Y), secondAprilTagPGP22Pos_Heading)
                 .build();
 
-        Action aprilTagPPG23 = drive.actionBuilder(new Pose2d(scanAprilTagPos_X, scanAprilTagPos_Y, scanAprilTagPos_Heading ))
-                .splineToSplineHeading(new Pose2d(-12, -30, Math.toRadians(270)), Math.toRadians(270))
+        Action aprilTagGPP21 = drive.actionBuilder(new Pose2d(scanAprilTagPos_X, scanAprilTagPos_Y, scanAprilTagPos_Heading ))
+                .splineTo(new Vector2d(firstAprilTagGPP21Pos_X, firstAprilTagGPP21Pos_Y), firstAprilTagGPP21Pos_Heading)
+                .splineTo(new Vector2d(secondAprilTagGPP21Pos_X, secondAprilTagGPP21Pos_Y), secondAprilTagGPP21Pos_Heading)
                 .build();
 
         Action scoreArtifacts = drive.actionBuilder(new Pose2d(pickedUpArtifactsPos_X, pickedUpArtifactsPos_Y, pickedUpArtifactsPos_Heading))
@@ -101,12 +122,12 @@ public class AutoTemplate extends LinearOpMode {
             actuator.init(hardwareMap);
             sensor.init(hardwareMap);
             //telemetryAprilTag();
-/*
+
             List<AprilTagDetection> currentDetections = aprilTag.getDetections();
 
             if(currentDetections.size() != 0) {
                 boolean tagFound = false;
-
+                /*
                 for (AprilTagDetection tag : currentDetections) {
                     if (tag.id == GPP || tag.id == PGP || tag.id == PPG) {
                         tagOfInterest = tag;
@@ -114,14 +135,52 @@ public class AutoTemplate extends LinearOpMode {
                         break;
                     }
                 }
+                */
+                for (AprilTagDetection tag : currentDetections) {
+                    if (tag.id == GPP) {
+                        telemetry.addLine("AprilTag ID DETECTED");
+                        telemetry.addLine("///// 21 GPP /////");
+                        telemetry.addLine("///// 21 GPP /////");
+                        telemetry.addLine("///// 21 GPP /////");
+                        telemetry.addLine("///// 21 GPP /////");
+                        telemetry.addLine("///// 21 GPP /////");
+                        tagOfInterest = tag;
+                        tagFound = true;
+                        break;
+                    }
+                    else if (tag.id == PGP) {
+                        telemetry.addLine("AprilTag ID DETECTED");
+                        telemetry.addLine("///// 22 PGP /////");
+                        telemetry.addLine("///// 22 PGP /////");
+                        telemetry.addLine("///// 22 PGP /////");
+                        telemetry.addLine("///// 22 PGP /////");
+                        telemetry.addLine("///// 22 PGP /////");
+                        tagOfInterest = tag;
+                        tagFound = true;
+                        break;
+                    }
+                    else if (tag.id == PPG) {
+                        telemetry.addLine("AprilTag ID DETECTED");
+                        telemetry.addLine("///// 23 PPG /////");
+                        telemetry.addLine("///// 23 PPG /////");
+                        telemetry.addLine("///// 23 PPG /////");
+                        telemetry.addLine("///// 23 PPG /////");
+                        telemetry.addLine("///// 23 PPG /////");
+                        tagOfInterest = tag;
+                        tagFound = true;
+                        break;
+                    }
+                }
+
             }
+
+
 
             cameraEnableAndDisable();
             telemetry.update();
             // Share the CPU.
             sleep(20);
 
- */
         }
 
         // Save more CPU resources when camera is no longer needed.
@@ -130,9 +189,8 @@ public class AutoTemplate extends LinearOpMode {
         waitForStart();
 
         if (opModeIsActive() && !isStopRequested()) {
-            Actions.runBlocking(new SequentialAction(splineTest));
-
-            /*
+            telemetry.clear();
+            telemetry.update();
             // Move to scan AprilTag
             Actions.runBlocking(new SequentialAction(scanAprilTag));
 
@@ -169,8 +227,6 @@ public class AutoTemplate extends LinearOpMode {
                         break;
                 }
             }
-
-             */
         }
     }
 
