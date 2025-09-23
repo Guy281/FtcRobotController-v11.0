@@ -29,6 +29,7 @@ public class AutoTemplate extends LinearOpMode {
     //Include all of your motors and sensors
     Actuators actuator = new Actuators();
     Sensors sensor = new Sensors();
+    autonomousPathConstants APC = new autonomousPathConstants();
 
     private AprilTagProcessor aprilTag; // store our instance of the AprilTag processor.
     private VisionPortal visionPortal; // store our instance of the vision portal.
@@ -38,40 +39,6 @@ public class AutoTemplate extends LinearOpMode {
     int GPP = 21;
     int PGP = 22;
     int PPG = 23;
-
-    ////////// STARTING POSITION //////////
-    double startingPos_X = -53;
-    double startingPos_Y = -49;
-    double startingPos_Heading = Math.toRadians(55);
-
-    /////////// APRILTAG PPG 23 ///////////
-    double firstAprilTagPPG23Pos_X = -53;
-    double firstAprilTagPPG23Pos_Y = -49;
-    double firstAprilTagPPG23Pos_Heading = Math.toRadians(55);
-
-    /////////// APRILTAG PGP 22 ///////////
-    double firstAprilTagPGP22Pos_X = -5;
-    double firstAprilTagPGP22Pos_Y = -20;
-    double firstAprilTagPGP22Pos_Heading = Math.toRadians(0);
-    double secondAprilTagPGP22Pos_X = 12;
-    double secondAprilTagPGP22Pos_Y = -30;
-    double secondAprilTagPGP22Pos_Heading = Math.toRadians(270);
-
-    /////////// APRILTAG GPP 21 ///////////
-    double firstAprilTagGPP21Pos_X = 19;
-    double firstAprilTagGPP21Pos_Y = -20;
-    double firstAprilTagGPP21Pos_Heading = Math.toRadians(0);
-    double secondAprilTagGPP21Pos_X = 36;
-    double secondAprilTagGPP21Pos_Y = -30;
-    double secondAprilTagGPP21Pos_Heading = Math.toRadians(270);
-
-    double scanAprilTagPos_X = -26;
-    double scanAprilTagPos_Y = -24;
-    double scanAprilTagPos_Heading = Math.toRadians(145);
-
-    double pickedUpArtifactsPos_X = 6;
-    double pickedUpArtifactsPos_Y = -16;
-    double pickedUpArtifactsPos_Heading = Math.toRadians(270);
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -85,34 +52,34 @@ public class AutoTemplate extends LinearOpMode {
 
         //TODO: Set up Robot starting position here!!!
         MecanumDrive drive = new MecanumDrive(hardwareMap,
-                new Pose2d(startingPos_X, startingPos_Y, startingPos_Heading ) );
+                new Pose2d(APC.startingPos_X, APC.startingPos_Y, APC.startingPos_Heading ) );
 
-        Action scanAprilTag = drive.actionBuilder(new Pose2d(startingPos_X, startingPos_Y, startingPos_Heading ))
-                .strafeToLinearHeading(new Vector2d(scanAprilTagPos_X, scanAprilTagPos_Y), scanAprilTagPos_Heading)
+        Action scanAprilTag = drive.actionBuilder(new Pose2d(APC.startingPos_X, APC.startingPos_Y, APC.startingPos_Heading ))
+                .strafeToLinearHeading(new Vector2d(APC.scanAprilTagPos_X, APC.scanAprilTagPos_Y), APC.scanAprilTagPos_Heading)
                 .build();
 
-        Action splineTest = drive.actionBuilder(new Pose2d(startingPos_X, startingPos_Y, startingPos_Heading ))
+        Action splineTest = drive.actionBuilder(new Pose2d(APC.startingPos_X, APC.startingPos_Y, APC.startingPos_Heading ))
                 .splineTo(new Vector2d(0, 0), Math.toRadians(0),
                         new TranslationalVelConstraint(20),
-                        new ProfileAccelConstraint(-20.0, 20.0)) //Do this path faster
+                        new ProfileAccelConstraint(-20.0, 20.0))
                 .build();
 
-        Action aprilTagPPG23 = drive.actionBuilder(new Pose2d(scanAprilTagPos_X, scanAprilTagPos_Y, scanAprilTagPos_Heading ))
-                .splineToSplineHeading(new Pose2d(firstAprilTagPPG23Pos_X, firstAprilTagPPG23Pos_Y, firstAprilTagPPG23Pos_Heading), Math.toRadians(270))
+        Action aprilTagPPG = drive.actionBuilder(new Pose2d(APC.scanAprilTagPos_X, APC.scanAprilTagPos_Y, APC.scanAprilTagPos_Heading ))
+                .splineToSplineHeading(new Pose2d(APC.firstAprilTagPPG23Pos_X, APC.firstAprilTagPPG23Pos_Y, APC.firstAprilTagPPG23Pos_Heading), Math.toRadians(270))
                 .build();
 
-        Action aprilTagPGP22 = drive.actionBuilder(new Pose2d(scanAprilTagPos_X, scanAprilTagPos_Y, scanAprilTagPos_Heading ))
-                .splineTo(new Vector2d(firstAprilTagPGP22Pos_X, firstAprilTagPGP22Pos_Y), firstAprilTagPGP22Pos_Heading)
-                .splineTo(new Vector2d(secondAprilTagPGP22Pos_X, secondAprilTagPGP22Pos_Y), secondAprilTagPGP22Pos_Heading)
+        Action aprilTagPGP22 = drive.actionBuilder(new Pose2d(APC.scanAprilTagPos_X, APC.scanAprilTagPos_Y, APC.scanAprilTagPos_Heading ))
+                .splineTo(new Vector2d(APC.firstAprilTagPGP22Pos_X, APC.firstAprilTagPGP22Pos_Y), APC.firstAprilTagPGP22Pos_Heading)
+                .splineTo(new Vector2d(APC.secondAprilTagPGP22Pos_X, APC.secondAprilTagPGP22Pos_Y), APC.secondAprilTagPGP22Pos_Heading)
                 .build();
 
-        Action aprilTagGPP21 = drive.actionBuilder(new Pose2d(scanAprilTagPos_X, scanAprilTagPos_Y, scanAprilTagPos_Heading ))
-                .splineTo(new Vector2d(firstAprilTagGPP21Pos_X, firstAprilTagGPP21Pos_Y), firstAprilTagGPP21Pos_Heading)
-                .splineTo(new Vector2d(secondAprilTagGPP21Pos_X, secondAprilTagGPP21Pos_Y), secondAprilTagGPP21Pos_Heading)
+        Action aprilTagGPP = drive.actionBuilder(new Pose2d(APC.scanAprilTagPos_X, APC.scanAprilTagPos_Y, APC.scanAprilTagPos_Heading ))
+                .splineTo(new Vector2d(APC.firstAprilTagGPP21Pos_X, APC.firstAprilTagGPP21Pos_Y), APC.firstAprilTagGPP21Pos_Heading)
+                .splineTo(new Vector2d(APC.secondAprilTagGPP21Pos_X, APC.secondAprilTagGPP21Pos_Y), APC.secondAprilTagGPP21Pos_Heading)
                 .build();
 
-        Action scoreArtifacts = drive.actionBuilder(new Pose2d(pickedUpArtifactsPos_X, pickedUpArtifactsPos_Y, pickedUpArtifactsPos_Heading))
-                .splineToSplineHeading(new Pose2d(startingPos_X, startingPos_Y, startingPos_Heading), Math.toRadians(270))
+        Action scoreArtifacts = drive.actionBuilder(new Pose2d(APC.pickedUpArtifactsPos_X, APC.pickedUpArtifactsPos_Y, APC.pickedUpArtifactsPos_Heading))
+                .splineToSplineHeading(new Pose2d(APC.startingPos_X, APC.startingPos_Y, APC.startingPos_Heading), Math.toRadians(270))
                 .build();
 
         //Create more trajectories as needed
@@ -121,11 +88,10 @@ public class AutoTemplate extends LinearOpMode {
             //include all of your hardware configurations
             actuator.init(hardwareMap);
             sensor.init(hardwareMap);
-            //telemetryAprilTag();
 
             List<AprilTagDetection> currentDetections = aprilTag.getDetections();
 
-            if(currentDetections.size() != 0) {
+            if(!currentDetections.isEmpty()) {
                 boolean tagFound = false;
                 /*
                 for (AprilTagDetection tag : currentDetections) {
@@ -173,9 +139,6 @@ public class AutoTemplate extends LinearOpMode {
                 }
 
             }
-
-
-
             cameraEnableAndDisable();
             telemetry.update();
             // Share the CPU.
@@ -199,29 +162,45 @@ public class AutoTemplate extends LinearOpMode {
             visionPortal.close();
 
             if(tagOfInterest == null) {
-                telemetry.addLine("Where is the AprilTag?");
+                telemetry.addLine("APRILTAG NOT FOUND");
+                telemetry.addLine("APRILTAG NOT FOUND");
+                telemetry.addLine("APRILTAG NOT FOUND");
+                telemetry.addLine("APRILTAG NOT FOUND");
                 telemetry.update();
             }
             else {
                 switch(tagOfInterest.id) {
                     case 21:
-                        pickedUpArtifactsPos_X = 36; pickedUpArtifactsPos_Y = -30; pickedUpArtifactsPos_Heading = Math.toRadians(270);
-                        telemetry.addLine("AprilTag ID 21 GPP");
-                        Actions.runBlocking(new SequentialAction(aprilTagGPP21));
+                        APC.pickedUpArtifactsPos_X = APC.firstAprilTagPPG23Pos_X;
+                        APC.pickedUpArtifactsPos_Y = APC.firstAprilTagPPG23Pos_Y;
+                        APC.pickedUpArtifactsPos_Heading = APC.firstAprilTagPPG23Pos_Heading;
+                        telemetry.addLine("AprilTag ID 21");
+                        telemetry.addLine("Going to PPG");
+                        Actions.runBlocking(new SequentialAction(aprilTagPPG));
                         Actions.runBlocking(new SequentialAction(scoreArtifacts));
                         telemetry.update();
                         break;
+
                     case 22:
-                        pickedUpArtifactsPos_X = 12; pickedUpArtifactsPos_Y = -30; pickedUpArtifactsPos_Heading = Math.toRadians(270);
+                        APC.pickedUpArtifactsPos_X = APC.firstAprilTagPGP22Pos_X;
+                        APC.pickedUpArtifactsPos_Y = APC.firstAprilTagPGP22Pos_Y;
+                        APC.pickedUpArtifactsPos_Heading = APC.firstAprilTagPGP22Pos_Heading;
                         telemetry.addLine("AprilTag ID 22 PGP");
+                        telemetry.addLine("Going to PGP");
                         Actions.runBlocking(new SequentialAction(aprilTagPGP22));
                         Actions.runBlocking(new SequentialAction(scoreArtifacts));
                         telemetry.update();
+
                         break;
+
                     case 23:
-                        pickedUpArtifactsPos_X = -12; pickedUpArtifactsPos_Y = -30; pickedUpArtifactsPos_Heading = Math.toRadians(270);
-                        telemetry.addLine("AprilTag ID 23 PPG");
-                        Actions.runBlocking(new SequentialAction(aprilTagPPG23));
+                        APC.pickedUpArtifactsPos_X = APC.firstAprilTagGPP21Pos_X;
+                        APC.pickedUpArtifactsPos_Y = APC.firstAprilTagGPP21Pos_Y;
+                        APC.pickedUpArtifactsPos_Heading = APC.firstAprilTagGPP21Pos_Heading;
+
+                        telemetry.addLine("AprilTag ID 23");
+                        telemetry.addLine("Going to GPP");
+                        Actions.runBlocking(new SequentialAction(aprilTagGPP));
                         Actions.runBlocking(new SequentialAction(scoreArtifacts));
                         telemetry.update();
                         break;
